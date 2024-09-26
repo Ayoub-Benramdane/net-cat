@@ -28,7 +28,6 @@ func CheckPort(por string) bool {
 }
 
 func welcoming(conn net.Conn, clients *map[net.Conn]string, messages *[]string, mu *sync.Mutex, lenMessages *int) string {
-
 	conn.Write([]byte("Welcome to TCP-Chat!\n         _nnnn_\n        dGGGGMMb\n       @p~qp~~qMb\n       M|@||@) M|\n       @,----.JM|\n      JS^\\__/  qKL\n     dZP        qKRb\n    dZP          qKKb\n   fZP            SMMb\n   HZM            MMMM\n   FqM            MMMM\n __| \".        |\\dS\"qML\n |    `.       | `' \\Zq\n_)      \\.___.,|     .'\n\\____   )MMMMMP|   .'\n     `-'       `--'\n[ENTER YOUR NAME]: "))
 
 	name := getName(conn)
@@ -94,7 +93,7 @@ func getName(conn net.Conn) string {
 }
 
 func AddMsg(msg string) {
-	err := os.WriteFile("file.txt", []byte(msg), 0644)
+	err := os.WriteFile("file.txt", []byte(msg), 0o644)
 	if err != nil {
 		return
 	}
@@ -103,10 +102,11 @@ func AddMsg(msg string) {
 func logMessage(name, msg string, messages *[]string, mu *sync.Mutex) {
 	mu.Lock()
 	*messages = append(*messages, fmt.Sprintf("[%s][%s]: %s\n", time.Now().Format("2006-01-02 15:04:05"), name, msg))
-	err := os.WriteFile("file.txt", []byte(msg), 0644)
-	if err != nil {
-		return
-	}
+	file, _ := os.Open("file.txt")
+	_, err := fmt.Fprint(file, msg)
+    if err != nil {
+        fmt.Println("Error writing to file:", err)
+    }
 	mu.Unlock()
 }
 
